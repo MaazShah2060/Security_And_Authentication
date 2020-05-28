@@ -6,6 +6,7 @@ const ejs = require("ejs");
 const app = express();
 const mongoose = require('mongoose');
 const encrypt = require('mongoose-encryption');
+const md5 = require('md5');
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true, useUnifiedTopology: true });
 const userSchema = new mongoose.Schema({
     email: String,
@@ -31,7 +32,7 @@ app.get('/register', function(req, res) {
 
 app.post('/login', function(req, res) {
     const Username = req.body.username;
-    const Password = req.body.password;
+    const Password = md5(req.body.password);
 
     User.findOne({ email: Username }, function(err, found) {
         if (err) {
@@ -52,7 +53,7 @@ app.post('/login', function(req, res) {
 
 app.post('/register', function(req, res) {
     const Username = req.body.username;
-    const Password = req.body.password;
+    const Password = md5(req.body.password);
     const newUser = new User({
         email: Username,
         password: Password
