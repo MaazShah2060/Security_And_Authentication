@@ -9,16 +9,27 @@ const encrypt = require('mongoose-encryption');
 const md5 = require('md5');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+const session = require("express-session");
+const passport = require('passport');
+const passportLocalMongoose = require('passport-local-mongoose');
+const User = mongoose.model("User", userSchema);
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use(session({
+    secret: 'mnmforce',
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true, useUnifiedTopology: true });
 const userSchema = new mongoose.Schema({
     email: String,
     password: String
 });
-const User = mongoose.model("User", userSchema);
-app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static("public"));
-
+userSchema.plugin(passportLocalMongoose);
 app.get('/', function(req, res) {
     res.render('home');
 });
@@ -72,6 +83,10 @@ app.post('/register', function(req, res) {
             }
         });
     });
+});
+
+app.listen(3000, function() {
+    console.log("Server started on port 3000");
 });
 
 app.listen(3000, function() {
